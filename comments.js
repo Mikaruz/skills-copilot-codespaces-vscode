@@ -1,57 +1,28 @@
-// Import the 'http' module
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+// Create web server
+// 1. GET /comments - Get all comments
+// 2. GET /comments/:id - Get a comment by id
+// 3. POST /comments - Create a new comment
+// 4. PUT /comments/:id - Update a comment by id
+// 5. DELETE /comments/:id - Delete a comment by id
 
-// Create an HTTP server that responds with a "Hello, World!" message for all requests
-const server = http.createServer((req, res) => {
-    // Handling different routes
-    let filePath = '.' + req.url;
-    if (filePath === './') {
-        filePath = './index.html';
-    }
+// Import express
+const express = require("express");
 
-    const extname = String(path.extname(filePath)).toLowerCase();
-    const contentType = {
-        '.html': 'text/html',
-        '.js': 'text/javascript',
-        '.css': 'text/css',
-        '.json': 'application/json',
-        '.png': 'image/png',
-        '.jpg': 'image/jpg',
-        '.gif': 'image/gif',
-        '.wav': 'audio/wav',
-        '.mp4': 'video/mp4',
-        '.woff': 'application/font-woff',
-        '.ttf': 'application/font-ttf',
-        '.eot': 'application/vnd.ms-fontobject',
-        '.otf': 'application/font-otf',
-        '.svg': 'application/image/svg+xml'
-    }[extname] || 'application/octet-stream';
+// Import comments controller
+const {
+  getComments,
+  getComment,
+  createComment,
+  updateComment,
+  deleteComment,
+} = require("../controllers/comments");
 
-    fs.readFile(filePath, function(error, content) {
-        if (error) {
-            if(error.code == 'ENOENT') {
-                fs.readFile('./404.html', function(error, content) {
-                    res.writeHead(404, { 'Content-Type': 'text/html' });
-                    res.end(content, 'utf-8');
-                });
-            }
-            else {
-                res.writeHead(500);
-                res.end('Sorry, check with the site admin for error: '+error.code+' ..\n');
-                res.end();
-            }
-        }
-        else {
-            res.writeHead(200, { 'Content-Type': contentType });
-            res.end(content, 'utf-8');
-        }
-    });
-});
+// Create router
+const router = express.Router();
 
-// Listen on port 3000, IP address defaults to 127.0.0.1
-const port = 3000;
-server.listen(port, () => {
-    console.log(`Server running at http://127.0.0.1:${port}/`);
-});
+// Create routes
+router.route("/").get(getComments).post(createComment);
+router.route("/:id").get(getComment).put(updateComment).delete(deleteComment);
+
+// Export module
+module.exports = router;
